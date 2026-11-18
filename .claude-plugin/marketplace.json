@@ -1,7 +1,7 @@
 {
-  "name": "ai-tells-local",
-  "owner": { "name": "local" },
-  "description": "Local marketplace for the ai-tells plugin.",
+  "name": "ai-tells",
+  "owner": { "name": "Zachary Inserra" },
+  "description": "Marketplace for the ai-tells plugin.",
   "plugins": [
     {
       "name": "ai-tells",

@@ -21,15 +21,17 @@ AI output tends toward the statistically safest choice: puffed-up significance, 
 
 ## Install
 
-```bash
-claude plugin validate ./ai-tells
+In Claude Code:
+
+```
+/plugin marketplace add zacharyinserra/ai-tells
+/plugin install ai-tells@ai-tells
 ```
 
-Then, in Claude Code:
+To work on a local clone instead, point the marketplace at the folder:
 
 ```
 /plugin marketplace add ./ai-tells
-/plugin install ai-tells@ai-tells-local
 ```
 
 You can also run the linter by itself:
@@ -89,3 +91,7 @@ Rules marked `[extra]` in the linter (seamless, elevate, unlock, and so on) are 
 ```bash
 node test/run.mjs
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
