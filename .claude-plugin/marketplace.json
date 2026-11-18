@@ -1,0 +1,12 @@
+{
+  "name": "ai-tells-local",
+  "owner": { "name": "local" },
+  "description": "Local marketplace for the ai-tells plugin.",
+  "plugins": [
+    {
+      "name": "ai-tells",
+      "source": "./",
+      "description": "Catch the tells that make prose and UI read as AI-generated."
+    }
+  ]
+}

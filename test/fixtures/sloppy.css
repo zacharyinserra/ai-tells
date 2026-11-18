@@ -1,0 +1,17 @@
+.hero h1 {
+  background: linear-gradient(90deg, #7c3aed, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: "Playfair Display", serif;
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+}
+.glow {
+  filter: blur(120px);
+  box-shadow: 0 0 40px #a855f7;
+}
+.card { border-left: 4px solid #10b981; }
