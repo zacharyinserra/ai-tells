@@ -13,8 +13,9 @@ The tells below are symptoms. Fix the cause (vague thinking, padding, puffery), 
 
 ## Before you write
 
-1. Know the one concrete point of each paragraph. If you can't state it in a sentence with a noun and a number/name/date in it, you are about to pad.
+1. Know the one concrete point of each paragraph. If you can't state it in a sentence with a noun and a number/name/date in it, you are about to pad. (This is a test for the paragraph, not a template for every sentence in it. See "Voice" below.)
 2. Know who the reader is and what they already know. Don't explain what they know; don't sell them what they already chose.
+3. Know the venue. A README, a Reddit post, a cover letter and a changelog have different registers. A forum post written in README voice reads as a press release; a README written in forum voice reads as a blog. Match what a regular in that venue writes.
 
 ## Hard rules (always fix)
 
@@ -53,7 +54,8 @@ The tells below are symptoms. Fix the cause (vague thinking, padding, puffery), 
 - **Heading restated in the first sentence.** `## Pricing` → "Here is our pricing." → Delete the restatement.
 - **Dismissal as "theater".** "That's just security theater." → Say concretely what's wrong.
 - **Placeholder names.** Jane Doe, John Smith, Acme Inc. → Real names or a marked TODO.
-- **Uniform shape.** Every paragraph the same length, a heading every two paragraphs, every list exactly three items. → Let the content set the shape.
+- **Uniform shape.** Every paragraph the same length, a heading every two paragraphs, every list exactly three items. → Let the content set the shape. Readers in comment sections call out shape more often than vocabulary, and the linter counts it (`triplet-lists`, `uniform-paragraphs`).
+- **Closing question nobody needed.** "What do you think?", "Have you tried this?", "Anyone else run into this?" as the last line. → End on the last real point. Ask only when you actually want the answer, and make the question specific.
 
 ## Formatting tells
 
@@ -67,12 +69,48 @@ The tells below are symptoms. Fix the cause (vague thinking, padding, puffery), 
 - **Italics on every technical term**, a horizontal rule between every section, arrows (→) in headings and bullets, a top heading that repeats the title.
 - **Hyphenated compound modifiers everywhere**, including after the noun ("the report is high-quality"). Hyphenate before the noun only.
 
-## Rhythm
+## Voice: the part cutting can't fix
 
-- Vary sentence length. A run of 12–20-word sentences, all ending in a period, reads machine-made. Put a short one in. Let one run long when the thought does.
-- Use plain verbs: *used* not *utilized*, *tried* not *attempted*, *wrote* not *authored*, *is* not *serves as*.
-- Allow ordinary human features: a real opinion, a superlative you can defend ("the only", "the first"), a qualifier ("probably", "tends to"), a specific aside.
-- Don't cycle synonyms to avoid repeating a noun. If it's "the bridge", keep calling it "the bridge".
+Everything above is subtraction. Apply only subtraction and you get a recognizable second-generation tell: prose that is accurate, tidy and dead, a steady beat of short subject-verb-object sentences that each state one fact and stop. "It runs after every edit. It never blocks a write. The exit code works in CI." No single sentence is wrong, and nobody writes like that for more than a paragraph. Readers now spot this as "Claude with guardrails". A person writing for other people thinks on the page, and the page shows it.
+
+**Vary the shape of sentences, not just the length.** Length variation alone is easy to fake; shape is what the ear picks up. Over any paragraph, mix:
+- a sentence that opens with a clause before the subject ("When I ran it on my own README, …", "Because the hook only sees one file, …");
+- one that starts with *And*, *But* or *So*, which is fine in all but the most formal writing;
+- one that carries two related thoughts with a semicolon, or a dash, or a "which" clause that wanders a little;
+- a parenthetical (the kind of thing you'd say with your voice dropped);
+- a question you actually had while doing the work, answered with what you found, not a rhetorical setup ("Would it catch its own output? Mostly. It flagged four of my sentences, and two of the flags were fair.");
+- now and then a long sentence that follows the thought where it goes, piles up a couple of specifics, and lands somewhere slightly different from where it started.
+
+If most sentences in a paragraph start with the subject ("It…", "The linter…", "I…", "This…"), restructure two of them. The linter's `subject-first-monotony` check flags this.
+
+**Show the thinking, not only the conclusions.** Clean AI prose reports results. People narrate how they got there, at least a little:
+- what you tried first and why it didn't work;
+- what surprised you, or what you got wrong;
+- what you still aren't sure about, and why (a hedge with a reason attached is human; a hedge without one is a tell);
+- the moment you changed your mind;
+- the trade-off you picked and what you gave up.
+
+One or two of these per piece, tied to real events, does more than any amount of word-level cleanup. Never invent them. If you don't know what happened, ask the user or leave a TODO; a fabricated anecdote is worse than a dry paragraph.
+
+**Allow a digression.** A sentence or two that steps off the main line (the reason the project exists, a thing that annoyed you, a side effect you didn't plan for) and then comes back. AI drafts never wander because every sentence is load-bearing. Real writing has some connective tissue that carries no fact at all ("which, in hindsight, was obvious"), and a paragraph that runs long because the writer cared about that part.
+
+**Make paragraphs uneven.** One long paragraph where the substance is, one that's two sentences, maybe one that's a single line because it earned it. Not every point needs a bullet; a list of five parallel bullets, each "noun does thing", is the same clipped beat in list form. Turn some lists into a paragraph that says how the items relate.
+
+**Keep plain words and a real point of view.** Use plain verbs: *used* not *utilized*, *tried* not *attempted*, *is* not *serves as*. Have an opinion, a superlative you can defend ("the only", "the first"), an honest "probably". Don't cycle synonyms to avoid repeating a noun; if it's "the bridge", keep calling it "the bridge".
+
+How this squares with the bans above: "Honestly?" as a run-up, "So what does this mean?" as a setup, and slang added for flavor are decoration, and they stay banned. A conjunction-led sentence, a parenthetical, a genuine question and a story about what broke are structure that comes from having thought about the subject. The test is whether the move carries content. Casual is fine; costume isn't.
+
+### Before and after
+
+Clipped (passes every rule above, still reads as AI):
+
+> I built a linter for AI tells. It has 77 rules. It runs after every Write or Edit. It never blocks a write. The exit code works in CI.
+
+Human:
+
+> The linter started as a regex list I kept in a gist, and it grew to 77 rules once I began running it on my own drafts and finding things I'd missed. It runs after every Write or Edit (I went back and forth on blocking writes, but a false positive that stops Claude mid-task is worse than a missed tell), and since the exit code is nonzero on findings, you can drop it into CI too.
+
+The second version is longer, has one sentence the first version had five of, admits a decision, and still contains every fact. Don't use it as a template; the details have to be true.
 
 ## Don't overcorrect
 
@@ -80,7 +118,8 @@ Stripping tells mechanically creates new ones. Avoid:
 - Removing **every** em dash and leaving only commas and periods. Zero-dash, comma-only prose is now its own tell.
 - Swapping banned words for thesaurus synonyms ("delve" → "dig deep into"). Change the sentence, not the word.
 - Adding fake typos, slang or forced casualness.
-- Chopping everything into identical 8–15-word sentences.
+- Chopping everything into identical 8–15-word sentences, or into a run of short declaratives that each state one fact. Cutting padding should leave the sentence's reasoning (its *because*, *but*, *so*, *which*) in place.
+- Deleting every transition. "Furthermore" is filler; "so", "but" and "which meant" are how a reader follows the logic.
 
 Perfect grammar, formal register, and transition words on their own are **not** tells. Density is the signal, not presence: one tell is noise; several together are the pattern.
 
@@ -94,4 +133,7 @@ After writing, run the linter on the file and fix the real findings:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/slop-lint.mjs" <file> --min=med
 ```
 
-Then reread once asking: *would a specialist who cares about this subject have written this sentence?* If not, rewrite it with a specific fact.
+Then do two reads:
+
+1. Sentence by sentence: *would a specialist who cares about this subject have written this sentence?* If not, rewrite it with a specific fact.
+2. Out loud, whole paragraphs at a time: does it sound like a person talking to someone, or like a list of findings? Look at how the sentences start. If they march (subject, verb, fact, period, repeat), combine some, open some with a clause, and put back the reasoning you cut. If nothing in the piece shows how you got to the conclusions, add one true detail about that.

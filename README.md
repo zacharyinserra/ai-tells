@@ -62,7 +62,7 @@ Suppress findings in a file with comments:
 
 Markdown code (fenced, indented, and inline), front matter, blockquotes and URLs aren't treated as prose.
 
-Prose: `chatbot-leakage`, `chat-phrasing` (low, or med when it's in the last few lines as a sign-off), `generation-artifact`, `puffery`, `participle-tail`, `negative-parallelism`, `vague-attribution`, `formulaic-closer`, `hedging-disclaimer`, `stock-opener`, `staged-runup`, `dramatic-closer`, `straw-man`, `deep-saying`, `stacked-qualifier`, `meta-writing`, `theater-dismissal`, `placeholder-name`, `connective-filler`, `repeated-openings`, `section-dividers`, `ai-vocab`, `ai-vocab-density`, `em-dash-density`, `uniform-rhythm`, `title-case-headings`, `inline-header-list`, `bold-overuse`, `emoji-bullet`, `curly-quotes`.
+Prose: `chatbot-leakage`, `chat-phrasing` (low, or med when it's in the last few lines as a sign-off), `generation-artifact`, `puffery`, `participle-tail`, `negative-parallelism`, `vague-attribution`, `formulaic-closer`, `hedging-disclaimer`, `stock-opener`, `staged-runup`, `dramatic-closer`, `straw-man`, `deep-saying`, `stacked-qualifier`, `meta-writing`, `theater-dismissal`, `placeholder-name`, `connective-filler`, `repeated-openings`, `section-dividers`, `ai-vocab`, `ai-vocab-density`, `em-dash-density`, `uniform-rhythm`, `subject-first-monotony`, `triplet-lists`, `uniform-paragraphs`, `restated-heading`, `closing-question`, `title-case-headings`, `inline-header-list`, `bold-overuse`, `emoji-bullet`, `curly-quotes`.
 
 UI: `gradient-text`, `purple-gradient`, `neon-palette`, `glow-blob`, `neon-glow`, `eyebrow-label`, `serif-hero-font`, `side-tab-accent`, `status-dot`, `identical-cards`, `emoji-ui`, `em-dash-label`, `decorative-numbering`, `unsourced-stats`, `fake-testimonials`, `markdown-bleed`, `overused-font`, `glassmorphism`, `hard-offset-shadow`, `decorative-texture`, `decorative-grid`, `extreme-radius`, `bounce-easing`, `marquee`, `blinking-cursor`, `scroll-reveal-everywhere`, `magic-z-index`, `width-100vw`, `mixed-icon-sets`, `badge-above-headline`, `icon-tile-cards`, `ghost-card`, `centered-fullscreen-hero`, `monotonous-spacing`, `fake-browser-chrome`, `generic-alt`, `colored-headline-word`, `stacked-slogans`, `typed-caps`, `flat-type-scale`, `token-bypass`.
 
@@ -70,7 +70,9 @@ Code (JS/TS/JSX/TSX/Python): `closing-brace-label`, `step-comments`, `hype-comme
 
 These are heuristics. "Landscape" can mean terrain, and a status dot can show real status. The skills and the reviewer agent tell the model to treat a finding as a reason to look, and to ignore false positives. The goal is more specific, deliberate work. Fooling a detector isn't the point.
 
-Some tells can't be linted: padding, claims with no facts behind them, every section using the same layout, missing real images. The skills and the reviewer agent cover those.
+A lot of what readers actually notice is shape rather than wording: every list three items long, paragraphs all the same size, a first sentence that repeats the heading, a closing question nobody needed, sentence after sentence opening "It…". Those are counts, so the linter checks them too (`triplet-lists`, `uniform-paragraphs`, `restated-heading`, `closing-question`, `subject-first-monotony`). They're tuned against a few hundred pre-AI npm READMEs, where they fire on roughly 2% of files, all at `low` except the most blatant cases.
+
+Some tells can't be linted at all: padding, claims with no facts behind them, prose that reports conclusions without any of the thinking, missing real images. The skills and the reviewer agent cover those.
 
 ## Sources
 
