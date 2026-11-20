@@ -141,6 +141,17 @@ function check(name, cond) {
     'connective-filler', 'repeated-openings', 'theater-dismissal', 'dramatic-closer']) check(`sloppy2.md: ${id}`, r.has(id));
 }
 {
+  // shape tells: counts, not phrases
+  const { findings } = run(fx('sloppy-shape.md'));
+  const r = rules(findings);
+  for (const id of ['triplet-lists', 'uniform-paragraphs', 'restated-heading', 'closing-question', 'subject-first-monotony'])
+    check(`sloppy-shape.md: ${id}`, r.has(id));
+  check('sloppy-shape.md: triplet-lists is med when every list has three items',
+    findings.some(f => f.rule === 'triplet-lists' && f.sev === 'med'));
+  check('sloppy-shape.md: closing cliché question is med',
+    findings.some(f => f.rule === 'closing-question' && f.sev === 'med'));
+}
+{
   const r = rules(run(fx('sloppy2.tsx')).findings);
   for (const id of ['overused-font', 'mixed-icon-sets', 'glassmorphism', 'badge-above-headline', 'icon-tile-cards', 'ghost-card',
     'centered-fullscreen-hero', 'monotonous-spacing', 'marquee', 'generic-alt', 'colored-headline-word', 'markdown-bleed',

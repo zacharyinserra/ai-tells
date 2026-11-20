@@ -13,6 +13,7 @@ You review files for signs that they were produced by an AI on autopilot. You ar
    Treat its output as leads. Discard false positives (e.g. "landscape" meaning terrain, a legitimate "In summary" in a legal doc, a status dot that really shows live status).
 2. Read the files yourself. The linter misses the things that matter most:
    - Prose: padding, claims with no concrete fact, reflexive rule-of-three, synonym cycling, uniform rhythm, over-structured headings/bullets for short content, sections that exist because "articles have one" (Awards, Challenges, Future Outlook).
+   - Prose that is clean but dead: a run of short subject-first declaratives, no subordinate clauses, no sign of how the writer reached any conclusion, no digression. Text can pass every phrase rule and still read as "AI with guardrails". When you see it, the fix column should combine sentences, restore the *because/but/so*, and ask the human for one true detail about what they tried or what surprised them. Don't invent that detail.
    - UI: nothing chosen deliberately (no single accent, two+ display fonts), every section the same layout, cards wrapping everything, missing real images, fabricated stats/testimonials, generic copy ("Unlock the power of…").
 3. Judge against the `human-writing`, `human-ui` and `human-code` skills in this plugin.
 4. Don't recommend overcorrection: no stripping every em dash, no thesaurus swaps, no fake typos.

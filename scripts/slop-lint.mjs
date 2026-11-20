@@ -381,7 +381,125 @@ function lintProse(text, ext, starts, add) {
     if (cv < 0.3) add('uniform-rhythm', 'low', 1, `Sentence lengths are very uniform (mean ${mean.toFixed(1)} words, CV ${cv.toFixed(2)}).`, 'Vary rhythm: some short sentences, some long ones.');
   }
 
-  if (MD_EXT.has(ext)) lintMarkdownStyle(view, starts, add);
+  if (MD_EXT.has(ext)) {
+    lintMarkdownStyle(view, starts, add);
+    lintShape(view, starts, add);
+  }
+  lintSentenceShape(view, starts, add);
+}
+
+// ---------- shape checks ----------
+// Tells that are counts, not phrases: list sizes, paragraph lengths, how
+// sentences open, how the piece starts and ends.
+
+const SUBJECT_OPENERS = new Set(['i', 'we', 'it', "it's", 'its', 'this', 'that', 'these', 'those', 'they', 'he', 'she', 'you',
+  'the', 'a', 'an', 'my', 'our', 'their', 'your', 'his', 'her', 'there']);
+// (SMALL is declared further down, so the shared words are repeated here rather than spread from it.)
+const STOP = new Set(['the', 'and', 'for', 'nor', 'but', 'with', 'from', 'into', 'via', 'you', 'your', 'what', 'why', 'how', 'when',
+  'where', 'which', 'who', 'does', 'can', 'should', 'are', 'was', 'were', 'its', 'this', 'that', 'our', 'not', 'about', 'use', 'using']);
+const stem = w => w.toLowerCase().replace(/(?:ing|ed|es|s)$/, '');
+const contentWords = s => (s.match(/[A-Za-z][A-Za-z'-]+/g) || []).map(w => w.toLowerCase()).filter(w => w.length >= 3 && !STOP.has(w)).map(stem);
+const splitSentences = s => s.replace(/\s+/g, ' ').split(/(?<=[.!?])\s+(?=[A-Z"“(])/).map(x => x.trim()).filter(x => wordCount(x) >= 3);
+
+// Blocks of a Markdown prose view: headings, lists (top-level items), and paragraphs, with offsets.
+function mdBlocks(view) {
+  const blocks = [];
+  const lines = view.split('\n');
+  let off = 0, cur = null;
+  const close = () => { if (cur) blocks.push(cur); cur = null; };
+  for (const ln of lines) {
+    const at = off; off += ln.length + 1;
+    if (!ln.trim()) { if (cur && cur.kind === 'para') close(); if (cur && cur.kind === 'list') cur.gap = true; continue; }
+    const h = ln.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
+    if (h) { close(); blocks.push({ kind: 'heading', text: h[1], index: at }); continue; }
+    if (/^\s*\|/.test(ln) || /^\s*>/.test(ln)) { close(); continue; }
+    const li = ln.match(/^(\s*)(?:[-*+]|\d+[.)])\s+(.*)$/);
+    if (li) {
+      const top = li[1].length < 2;
+      if (cur && cur.kind === 'list') { if (top) cur.items++; cur.gap = false; continue; }
+      close(); cur = { kind: 'list', items: 1, index: at }; continue;
+    }
+    if (cur && cur.kind === 'list') { if (!cur.gap || /^\s{2,}/.test(ln)) continue; close(); }
+    if (!cur) cur = { kind: 'para', text: '', index: at };
+    cur.text += ln + ' ';
+  }
+  close();
+  return blocks;
+}
+
+function lintShape(view, starts, add) {
+  const blocks = mdBlocks(view);
+  const L = i => lineOf(starts, i);
+
+  // Three-item lists everywhere (rule of three, as structure).
+  const lists = blocks.filter(b => b.kind === 'list' && b.items >= 2);
+  const threes = lists.filter(b => b.items === 3);
+  if ((threes.length >= 4 && threes.length / lists.length >= 0.6) || (threes.length >= 3 && threes.length === lists.length)) {
+    let sections = 0, withThree = 0, inThree = false, any = false;
+    for (const b of blocks) {
+      if (b.kind === 'heading') { if (any) { sections++; if (inThree) withThree++; } inThree = false; any = true; continue; }
+      any = true;
+      if (b.kind === 'list' && b.items === 3) inThree = true;
+    }
+    if (any) { sections++; if (inThree) withThree++; }
+    const sev = threes.length >= 4 && threes.length / lists.length >= 0.8 ? 'med' : 'low';
+    add('triplet-lists', sev, L(threes[0].index), `${threes.length} of ${lists.length} lists have exactly three items${sections > 1 ? ` (${withThree} of ${sections} sections)` : ''}.`,
+      'Use the number of items that actually exist. Fold some lists into prose, and let others run to two, four or seven.');
+  }
+
+  // Paragraphs all about the same length.
+  const paras = blocks.filter(b => b.kind === 'para').map(b => ({ ...b, n: wordCount(b.text) })).filter(b => b.n >= 12);
+  if (paras.length >= 6 && paras.reduce((a, p) => a + p.n, 0) / paras.length >= 20) {
+    const ns = paras.map(p => p.n);
+    const mean = ns.reduce((a, b) => a + b, 0) / ns.length;
+    const cv = Math.sqrt(ns.reduce((a, b) => a + (b - mean) ** 2, 0) / ns.length) / mean;
+    if (cv < 0.2) add('uniform-paragraphs', 'low', L(paras[0].index), `${paras.length} paragraphs of near-identical length (mean ${mean.toFixed(0)} words, CV ${cv.toFixed(2)}).`,
+      'Let the content set the length: a long paragraph where the substance is, a two-sentence one where it isn\'t.');
+  }
+
+  // First sentence under a heading restates the heading (or the question in it).
+  for (let i = 0; i < blocks.length - 1; i++) {
+    const h = blocks[i], p = blocks[i + 1];
+    if (h.kind !== 'heading' || p.kind !== 'para') continue;
+    const hw = [...new Set(contentWords(h.text))];
+    const first = splitSentences(p.text)[0] || p.text.trim();
+    if (hw.length < 2 || wordCount(first) > 25) continue;
+    const fw = new Set(contentWords(first));
+    const hit = hw.filter(w => fw.has(w)).length;
+    const restatey = /^(?:(?:so,?\s+)?(?:why|what|how|when|is|are|can|should|do|does)\b.*\?$)/i.test(h.text.trim())
+      || /^(?:there are (?:several|many|a few|three|two)|here(?:'s| is| are)|this (?:section|is)|when it comes to|(?:great|good) question)/i.test(first);
+    if (restatey && hit / hw.length >= 0.75) {
+      add('restated-heading', 'low', L(p.index + Math.max(0, p.text.search(/\S/))), `First sentence restates the heading ("${h.text.trim().slice(0, 40)}").`,
+        'Start with the answer or the first new fact. The heading already said what the section is about.');
+    }
+  }
+
+  // Closing question to the reader.
+  const lastPara = [...blocks].reverse().find(b => b.kind === 'para');
+  if (lastPara && blocks.filter(b => b.kind === 'para').length >= 2) {
+    const sents = splitSentences(lastPara.text);
+    const last = (sents[sents.length - 1] || '').trim();
+    if (/\?["”)]*$/.test(last) && /\b(you|your|anyone|anybody|everyone|y'all|thoughts|folks)\b/i.test(last)) {
+      const cliche = /\b(what do you think|thoughts\?|what are your thoughts|have you (?:ever|tried)|what(?:'s| is) your|how do you|would you|anyone else|let me know)\b/i.test(last);
+      const at = lastPara.index + lastPara.text.lastIndexOf(last.slice(0, 20));
+      add('closing-question', cliche ? 'med' : 'low', L(Math.max(lastPara.index, at)), `Ends on a question to the reader ("${last.slice(0, 50)}").`,
+        'End on the last real point. Ask only if you need the answer, and then ask something specific.');
+    }
+  }
+}
+
+// Most sentences open subject-first: the clipped "It does X. It does Y." beat.
+function lintSentenceShape(view, starts, add) {
+  const sents = splitSentences(view.split('\n').filter(l => !/^\s*#/.test(l)).join('\n'));
+  if (sents.length < 10) return;
+  const first = s => (s.match(/^[("“]*([A-Za-z][A-Za-z'’]*)/) || [, ''])[1].toLowerCase().replace('’', "'");
+  const subj = sents.filter(s => SUBJECT_OPENERS.has(first(s)));
+  const clipped = subj.filter(s => wordCount(s) <= 14 && !/[,;:(—]/.test(s.slice(0, -1)));
+  const share = subj.length / sents.length;
+  if (share >= 0.7 && clipped.length / sents.length >= 0.2) {
+    add('subject-first-monotony', 'low', 1, `${subj.length} of ${sents.length} sentences open with the subject (${Math.round(share * 100)}%), ${clipped.length} of them short and unbroken.`,
+      'Open some sentences with a clause ("When…", "Because…"), start one with But or So, and combine short facts that belong together.');
+  }
 }
 
 const SMALL = new Set(['a', 'an', 'the', 'and', 'or', 'but', 'for', 'nor', 'of', 'on', 'in', 'to', 'at', 'by', 'up', 'as', 'is', 'vs', 'via', 'with', 'from', 'into']);
