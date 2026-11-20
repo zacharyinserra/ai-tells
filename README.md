@@ -2,6 +2,8 @@
 
 # ai-tells
 
+![/slop-review finds tells in a draft, /deslop rewrites it, and the linter comes back clean](assets/demo.gif)
+
 A Claude Code plugin that helps agents write prose and build UIs that don't read as AI-generated.
 
 AI output tends toward the statistically safest choice: puffed-up significance, "delve" and "tapestry", em dashes everywhere, purple gradient headlines, eyebrow labels, identical card grids. Each choice is fine alone. Together they look like nobody decided anything. This plugin gives the agent rules to follow before it writes, and a linter that checks the result afterward.
