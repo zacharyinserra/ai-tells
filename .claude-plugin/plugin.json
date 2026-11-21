@@ -1,6 +1,6 @@
 {
   "name": "ai-tells",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Catch the tells that make prose, UI and code read as AI-generated: guidance skills, a reviewer agent, a /deslop command, and a zero-dependency linter that runs after file writes.",
   "keywords": ["writing", "design", "ui", "lint", "ai-slop", "style"],
   "license": "MIT",
